@@ -1,0 +1,10 @@
+# Requested dataset folders
+Dataset/
+data/
+
+# Python/cache artifacts
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
