@@ -1,9 +1,8 @@
+import argparse
 import pandas as pd
-import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import BorderlineSMOTE
-from argparse import ArgumentParser
 
 def main(input_path, output_path, target_column):
     try:
@@ -14,8 +13,8 @@ def main(input_path, output_path, target_column):
         X = df.drop(columns=[target_column])
         y = df[target_column]
 
-        # Impute missing values if any (though none are present in this dataset)
-        imputer = SimpleImputer(strategy='mean')
+        # Impute missing values (if any)
+        imputer = SimpleImputer(strategy='median')
         X_imputed = imputer.fit_transform(X)
 
         # Scale the features
@@ -26,11 +25,11 @@ def main(input_path, output_path, target_column):
         smote = BorderlineSMOTE(random_state=42)
         X_resampled, y_resampled = smote.fit_resample(X_scaled, y)
 
-        # Combine the resampled features and target back into a DataFrame
+        # Combine the resampled features and target into a DataFrame
         resampled_df = pd.DataFrame(X_resampled, columns=X.columns)
         resampled_df[target_column] = y_resampled
 
-        # Save the transformed dataframe to output path
+        # Save the transformed dataframe to output CSV
         resampled_df.to_csv(output_path, index=False)
 
     except Exception as e:
@@ -38,10 +37,10 @@ def main(input_path, output_path, target_column):
         exit(1)
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument('--input', required=True)
-    parser.add_argument('--output', required=True)
-    parser.add_argument('--target', required=True)
+    parser = argparse.ArgumentParser(description="Transform and balance dataset.")
+    parser.add_argument("--input", required=True, help="Input CSV path")
+    parser.add_argument("--output", required=True, help="Output CSV path")
+    parser.add_argument("--target", required=True, help="Target column name")
     args = parser.parse_args()
 
     main(args.input, args.output, args.target)

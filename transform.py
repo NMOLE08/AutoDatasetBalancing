@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-
 import pandas as pd
 
 
@@ -18,15 +17,13 @@ def main() -> None:
     df = pd.read_csv(args.input)
 
     if args.target not in df.columns:
-        raise ValueError(f"Target column '{args.target}' not found in input dataset.")
+        raise ValueError(f"Target column '{args.target}' not found.")
 
-    # Default fallback: lightweight cleanup only.
-    df = df.replace([float("inf"), float("-inf")], pd.NA)
     for col in df.columns:
         if col == args.target:
             continue
-        if df[col].dtype.kind in {"i", "u", "f"}:
-            df[col] = df[col].fillna(df[col].median())
+        if pd.api.types.is_numeric_dtype(df[col]):
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(df[col].median())
         else:
             mode = df[col].mode(dropna=True)
             df[col] = df[col].fillna(mode.iloc[0] if not mode.empty else "unknown")
@@ -36,4 +33,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
